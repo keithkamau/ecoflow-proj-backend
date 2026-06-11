@@ -13,11 +13,11 @@ engine = create_engine(settings.DATABASE_URL)
 
 # This is what we'll use to open and close database sessions 
 # Keeping autocommit off so we control when changes actually save
-SessionLocal = sessionmaker(autocaommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # All our models will inherit from this
 # SQLAlchemy uses it to know which classes map to database tables 
-BAse = declarative_base()
+Base = declarative_base()
 
 # A simple function thta opens a db session for a request
 # and makes sure ut gets closed properly when we're done
