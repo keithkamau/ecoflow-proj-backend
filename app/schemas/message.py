@@ -1,7 +1,7 @@
 # message.py (schema)
 # keeps messaging simple — just send a text, get messages back
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional
 
@@ -29,5 +29,4 @@ class MessageResponse(BaseModel):
     created_at: datetime
     read_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
