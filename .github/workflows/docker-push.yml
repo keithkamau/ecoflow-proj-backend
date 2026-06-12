@@ -7,9 +7,20 @@ on:
     branches: [main]
 
 jobs:
-  build-and-push:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: pytest tests/ -v --cov=app
 
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
@@ -29,14 +40,9 @@ jobs:
             type=sha,prefix=
 
       - name: Build and push
-        uses: docker/buildx-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Run tests
-        run: |
-          pip install -r requirements.txt
-          pytest tests/ -v --cov=app
