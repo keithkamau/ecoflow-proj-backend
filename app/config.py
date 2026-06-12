@@ -2,7 +2,7 @@
 # All the app settings live here
 # If you need to change something like the db url or token expiry, this is the place
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # Using SQLite locally to keep things simple during development
@@ -18,9 +18,7 @@ class Settings(BaseSettings):
     # Tokens expire after 30 minutes by default
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    class Config:
-        # pulls in any variables we set in the .env file
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env")
 
 # one instance shared across the whole app
 settings = Settings()

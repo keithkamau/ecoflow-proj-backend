@@ -1,7 +1,7 @@
 # transaction.py (schema)
 # defines the shape of transaction data coming in and going out
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 from app.models.transaction import TransactionStatus
@@ -35,5 +35,4 @@ class TransactionResponse(BaseModel):
     created_at: datetime
     completed_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
