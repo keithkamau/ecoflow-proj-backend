@@ -1,13 +1,9 @@
-# transaction.py (schema)
-# defines the shape of transaction data coming in and going out
-
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 from app.models.transaction import TransactionStatus
 
-# transactions are created automatically when an offer is accepted
-# so we only need the offer_id to create one
+
 class TransactionCreate(BaseModel):
     offer_id: int
     listing_id: int
@@ -17,11 +13,13 @@ class TransactionCreate(BaseModel):
     final_quantity: float
     final_price: float
 
-# for updating the transaction status as it moves through the pipeline
+
 class TransactionUpdate(BaseModel):
     status: TransactionStatus
+    pickup_notes: Optional[str] = None
+    dispute_reason: Optional[str] = None
 
-# what we send back when returning transaction data
+
 class TransactionResponse(BaseModel):
     id: int
     listing_id: int
@@ -32,6 +30,10 @@ class TransactionResponse(BaseModel):
     final_quantity: float
     final_price: float
     status: TransactionStatus
+    pickup_notes: Optional[str]
+    pickup_scheduled_at: Optional[datetime]
+    disputed_at: Optional[datetime]
+    dispute_reason: Optional[str]
     created_at: datetime
     completed_at: Optional[datetime]
 

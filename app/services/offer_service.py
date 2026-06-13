@@ -22,7 +22,7 @@ def create_offer(db: Session, listing_id: int, recycler_id: int, offered_price: 
         recycler_id=recycler_id,
         offered_price=offered_price,
         quantity=quantity,
-        note=note
+        note=note,
     )
     db.add(offer)
     db.commit()
@@ -39,6 +39,22 @@ def update_offer_status(db: Session, offer_id: int, status: OfferStatus, note: s
     offer.status = status
     if note:
         offer.note = note
+    db.commit()
+    db.refresh(offer)
+    return offer
+
+
+def counter_offer(db: Session, offer_id: int, counter_price: float, counter_quantity: float = None, counter_note: str = None):
+    offer = get_offer_by_id(db, offer_id)
+    if not offer:
+        return None
+    if offer.status != OfferStatus.PENDING:
+        return None
+    offer.status = OfferStatus.COUNTERED
+    offer.counter_price = counter_price
+    offer.counter_quantity = counter_quantity or offer.quantity
+    offer.counter_note = counter_note
+    offer.countered_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(offer)
     return offer

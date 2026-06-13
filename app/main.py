@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.models import Offer, Transaction, Payment, Message
-from app.routers import offers, transactions, payments, messages
+from app.routers import offers, transactions, payments, messages, notifications
 
 # create all database tables if they don't exist yet
 Base.metadata.create_all(bind=engine)
@@ -36,6 +36,7 @@ app.include_router(offers.router)
 app.include_router(transactions.router)
 app.include_router(payments.router)
 app.include_router(messages.router)
+app.include_router(notifications.router)
 
 # basic health check so we can confirm the server is running
 @app.get("/")

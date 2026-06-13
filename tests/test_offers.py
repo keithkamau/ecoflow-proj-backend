@@ -53,3 +53,44 @@ def test_offer_price_must_be_positive(client):
         "quantity": 10.0
     })
     assert response.status_code == 422
+
+
+def test_delete_pending_offer(client):
+    create = client.post("/api/v1/offers/", json={
+        "listing_id": 1,
+        "offered_price": 12.0,
+        "quantity": 25.0
+    })
+    offer_id = create.json()["id"]
+    response = client.delete(f"/api/v1/offers/{offer_id}")
+    assert response.status_code == 204
+
+
+def test_delete_non_pending_offer_fails(client):
+    create = client.post("/api/v1/offers/", json={
+        "listing_id": 1,
+        "offered_price": 12.0,
+        "quantity": 25.0
+    })
+    offer_id = create.json()["id"]
+    client.put(f"/api/v1/offers/{offer_id}", json={"status": "accepted"})
+    response = client.delete(f"/api/v1/offers/{offer_id}")
+    assert response.status_code == 400
+
+
+def test_counter_offer(client):
+    create = client.post("/api/v1/offers/", json={
+        "listing_id": 1,
+        "offered_price": 10.0,
+        "quantity": 20.0
+    })
+    offer_id = create.json()["id"]
+    response = client.post(f"/api/v1/offers/{offer_id}/counter", json={
+        "counter_price": 15.0,
+        "counter_quantity": 20.0,
+        "counter_note": "Can you do KES 15?"
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "countered"
+    assert data["counter_price"] == 15.0

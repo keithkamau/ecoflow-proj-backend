@@ -4,7 +4,7 @@ from typing import List
 
 from app.database import get_db
 from app.schemas.message import MessageCreate, MessageResponse
-from app.services.message_service import send_message, get_messages_by_offer, mark_message_as_read
+from app.services.message_service import send_message, get_messages_by_offer, mark_message_as_read, get_unread_count
 
 router = APIRouter(prefix="/api/v1/messages", tags=["messages"])
 
@@ -19,6 +19,12 @@ def create_message(message: MessageCreate, db: Session = Depends(get_db)):
         message_text=message.message_text,
     )
     return new_message
+
+
+@router.get("/unread/count")
+def unread_count(db: Session = Depends(get_db)):
+    count = get_unread_count(db, user_id=1)
+    return {"count": count}
 
 
 @router.get("/{offer_id}", response_model=List[MessageResponse])

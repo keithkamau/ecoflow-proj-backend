@@ -1,24 +1,24 @@
-# config.py
-# All the app settings live here
-# If you need to change something like the db url or token expiry, this is the place
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
-    # Using SQLite locally to keep things simple during development
-    # we'll swap this out for PostgreSQL when we push to production
     DATABASE_URL: str = "sqlite:///./waste_hub.db"
-
-    # Used to sign our JWT tokens — don't leave this as default in production
     SECRET_KEY: str = "your-secret-key-change-in-production"
-
-    # JWT signing algorithm
     ALGORITHM: str = "HS256"
-
-    # Tokens expire after 30 minutes by default
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Daraja M-Pesa API settings
+    MPESA_CONSUMER_KEY: str = ""
+    MPESA_CONSUMER_SECRET: str = ""
+    MPESA_PASSKEY: str = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+    MPESA_SHORTCODE: str = "174379"
+    MPESA_ENVIRONMENT: str = "sandbox"
+    MPESA_CALLBACK_URL: str = "http://localhost:8000/api/v1/payments/callback"
+
+    # Platform commission
+    COMMISSION_RATE: float = 0.05
 
     model_config = SettingsConfigDict(env_file=".env")
 
-# one instance shared across the whole app
+
 settings = Settings()

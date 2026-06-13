@@ -3,12 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.schemas.offer import OfferCreate, OfferUpdate, OfferResponse
+from app.schemas.offer import OfferCreate, OfferUpdate, OfferResponse, CounterOfferCreate
 from app.services.offer_service import (
     get_all_offers,
     get_offer_by_id,
     create_offer,
     update_offer_status,
+    counter_offer,
     delete_offer,
 )
 
@@ -49,6 +50,23 @@ def update_offer(offer_id: int, update: OfferUpdate, db: Session = Depends(get_d
         if not existing:
             raise HTTPException(status_code=404, detail="Offer not found")
         raise HTTPException(status_code=400, detail="This offer is already closed")
+    return offer
+
+
+@router.post("/{offer_id}/counter", response_model=OfferResponse)
+def counter_offer_endpoint(offer_id: int, counter: CounterOfferCreate, db: Session = Depends(get_db)):
+    offer = counter_offer(
+        db,
+        offer_id=offer_id,
+        counter_price=counter.counter_price,
+        counter_quantity=counter.counter_quantity,
+        counter_note=counter.counter_note,
+    )
+    if offer is None:
+        existing = get_offer_by_id(db, offer_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail="Offer not found")
+        raise HTTPException(status_code=400, detail="Can only counter a pending offer")
     return offer
 
 

@@ -10,6 +10,7 @@ from app.services.transaction_service import (
     create_transaction,
     update_transaction_status,
 )
+from app.models.transaction import TransactionStatus
 
 router = APIRouter(prefix="/api/v1/transactions", tags=["transactions"])
 
@@ -48,7 +49,17 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{transaction_id}", response_model=TransactionResponse)
 def update_transaction(transaction_id: int, update: TransactionUpdate, db: Session = Depends(get_db)):
-    transaction = update_transaction_status(db, transaction_id, update.status)
+    transaction = update_transaction_status(
+        db, transaction_id, update.status,
+        pickup_notes=update.pickup_notes,
+        dispute_reason=update.dispute_reason,
+    )
     if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        existing = get_transaction_by_id(db, transaction_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid state transition from {existing.status.value} to {update.status.value}",
+        )
     return transaction

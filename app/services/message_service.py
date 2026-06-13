@@ -5,8 +5,16 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from app.models.message import Message
 
+
 def get_messages_by_offer(db: Session, offer_id: int):
     return db.query(Message).filter(Message.offer_id == offer_id).all()
+
+
+def get_unread_count(db: Session, user_id: int):
+    return db.query(Message).filter(
+        Message.recipient_id == user_id,
+        Message.is_read == False
+    ).count()
 
 def send_message(db: Session, sender_id: int, recipient_id: int, offer_id: int, message_text: str):
     message = Message(
