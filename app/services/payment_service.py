@@ -35,19 +35,34 @@ def initiate_payment(db: Session, transaction_id: int, user_id: int, amount: flo
             transaction_desc="Waste Hub Payment",
         )
 
-        payment = Payment(
-            transaction_id=transaction_id,
-            user_id=user_id,
-            amount=amount,
-            payment_method=payment_method,
-            status=PaymentStatus.PENDING if result["success"] else PaymentStatus.FAILED,
-            reference=result.get("checkout_request_id"),
-            merchant_request_id=result.get("merchant_request_id"),
-            checkout_request_id=result.get("checkout_request_id"),
-            phone_number=phone_number,
-            commission_rate=commission_rate,
-            commission_amount=commission_amount,
-        )
+        if result["success"]:
+            payment = Payment(
+                transaction_id=transaction_id,
+                user_id=user_id,
+                amount=amount,
+                payment_method=payment_method,
+                status=PaymentStatus.PENDING,
+                reference=result.get("checkout_request_id"),
+                merchant_request_id=result.get("merchant_request_id"),
+                checkout_request_id=result.get("checkout_request_id"),
+                phone_number=phone_number,
+                commission_rate=commission_rate,
+                commission_amount=commission_amount,
+            )
+        else:
+            mock_ref = f"DEMO-{uuid.uuid4().hex[:8].upper()}"
+            payment = Payment(
+                transaction_id=transaction_id,
+                user_id=user_id,
+                amount=amount,
+                payment_method=payment_method,
+                status=PaymentStatus.PENDING,
+                reference=mock_ref,
+                checkout_request_id=mock_ref,
+                phone_number=phone_number,
+                commission_rate=commission_rate,
+                commission_amount=commission_amount,
+            )
         db.add(payment)
         db.commit()
         db.refresh(payment)
@@ -76,6 +91,8 @@ def initiate_payment(db: Session, transaction_id: int, user_id: int, amount: flo
 def complete_payment(db: Session, checkout_request_id: str, mpesa_receipt: str, result_desc: str = None):
     payment = db.query(Payment).filter(Payment.checkout_request_id == checkout_request_id).first()
     if not payment:
+        payment = db.query(Payment).filter(Payment.reference == checkout_request_id).first()
+    if not payment:
         return None
 
     payment.status = PaymentStatus.SUCCESS
@@ -87,6 +104,22 @@ def complete_payment(db: Session, checkout_request_id: str, mpesa_receipt: str, 
         transaction.status = TransactionStatus.COMPLETED
         transaction.completed_at = datetime.now(timezone.utc)
 
+    db.commit()
+    db.refresh(payment)
+    return payment
+
+
+def confirm_payment_by_id(db: Session, payment_id: int, mpesa_receipt: str):
+    payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not payment:
+        return None
+    payment.status = PaymentStatus.SUCCESS
+    payment.mpesa_receipt = mpesa_receipt
+    payment.paid_at = datetime.now(timezone.utc)
+    transaction = db.query(Transaction).filter(Transaction.id == payment.transaction_id).first()
+    if transaction:
+        transaction.status = TransactionStatus.COMPLETED
+        transaction.completed_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(payment)
     return payment

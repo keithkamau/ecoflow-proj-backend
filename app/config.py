@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     MPESA_PASSKEY: str = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
     MPESA_SHORTCODE: str = "174379"
     MPESA_ENVIRONMENT: str = "sandbox"
-    MPESA_CALLBACK_URL: str = "http://localhost:8000/api/v1/payments/callback"
+    MPESA_CALLBACK_URL: str = "http://192.168.100.205:8000/api/v1/payments/callback"
 
     # Platform commission
     COMMISSION_RATE: float = 0.05

@@ -60,14 +60,10 @@ async def mpesa_callback(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/{payment_id}/confirm")
 def confirm_payment_manual(payment_id: int, mpesa_receipt: str, db: Session = Depends(get_db)):
-    payment = get_payment_by_id(db, payment_id)
-    if not payment:
-        raise HTTPException(status_code=404, detail="Payment not found")
-    if not payment.checkout_request_id:
-        raise HTTPException(status_code=400, detail="No M-Pesa checkout request for this payment")
-    result = complete_payment(db, payment.checkout_request_id, mpesa_receipt)
+    from app.services.payment_service import confirm_payment_by_id
+    result = confirm_payment_by_id(db, payment_id, mpesa_receipt)
     if not result:
-        raise HTTPException(status_code=400, detail="Failed to complete payment")
+        raise HTTPException(status_code=404, detail="Payment not found")
     return result
 
 
@@ -82,14 +78,6 @@ def fail_payment_manual(payment_id: int, db: Session = Depends(get_db)):
     if not result:
         raise HTTPException(status_code=400, detail="Failed to update payment")
     return result
-
-
-@router.get("/{transaction_id}", response_model=PaymentResponse)
-def get_payment(transaction_id: int, db: Session = Depends(get_db)):
-    payment = get_payment_by_transaction(db, transaction_id)
-    if not payment:
-        raise HTTPException(status_code=404, detail="Payment not found")
-    return payment
 
 
 @router.get("/", response_model=List[PaymentResponse])
@@ -111,3 +99,11 @@ def check_payment_status(payment_id: int, db: Session = Depends(get_db)):
     if not result:
         raise HTTPException(status_code=404, detail="Payment not found")
     return result
+
+
+@router.get("/{transaction_id}", response_model=PaymentResponse)
+def get_payment(transaction_id: int, db: Session = Depends(get_db)):
+    payment = get_payment_by_transaction(db, transaction_id)
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    return payment
