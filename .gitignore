@@ -1,67 +1,47 @@
-# Python
+# === Python Virtual Environment ===
+venv/
+.venv/
+env/
+ENV/
+
+# === Python Cache ===
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-*.so
 
-# Virtual environment
-venv/
-env/
-ENV/
+# === Environment & Secrets ===
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
 
-# Database
-*.db
+# === Databases ===
 *.sqlite
 *.sqlite3
-
-# Coverage
-.coverage
-htmlcov/
-.coverage.*
-
-# Uploads
-uploads/
-# Virtual environment
-venv/
-env/
-.venv/
-.env.example
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-*.egg-info/
-dist/
-build/
-
-# Environment variables
-.env
-
-# Testing
-.pytest_cache/
+*.db
+dump.rdb
 test.db
-.coverage
-htmlcov/
 
-# IDE
+# === Test & Coverage ===
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+
+# === Uploads / User-generated content ===
+uploads/
+media/
+
+# === IDE ===
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
-# pytest
-.pytest_cache/
-# Uploads (KYC documents)
-uploads/
-
-# OS
-.DS_Store
-Thumbs.db
+# === Logs ===
+*.log
